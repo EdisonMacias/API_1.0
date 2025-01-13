@@ -3,10 +3,21 @@ from ultralytics import YOLO
 import io
 import base64
 from PIL import Image
+import time
 
 # Inicializar Flask y cargar el modelo YOLO
 app = Flask(__name__)
 model = YOLO("C:/Users/ediso/OneDrive/Escritorio/API_1.0/model/best.pt")
+
+# Definir las clases del modelo
+CLASS_NAMES = [
+    "Adultas", 
+    "Con_daño", 
+    "Huevos", 
+    "Larvas", 
+    "Maiz_sano", 
+    "Otras"
+]
 
 # Diccionario de detalles según la clase detectada
 class_details = {
@@ -25,8 +36,44 @@ def image_to_base64(image):
     img_io.seek(0)
     return base64.b64encode(img_io.getvalue()).decode('utf-8')
 
-@app.route('/predict', methods=['POST'])
-def predict():
+# Contadores globales
+start_time = time.time()
+request_count = 0
+
+# Ruta para el estado de la API
+@app.route('/status', methods=['GET'])
+def status():
+    try:
+        # Devolver el estado de la API
+        response = {
+            "status": "active",
+            "message": "La API está funcionando correctamente"
+        }
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": f"Ocurrió un error durante la consulta del estado: {str(e)}"}), 500
+
+# Ruta para las métricas del modelo
+@app.route('/metrics', methods=['GET'])
+def metrics():
+    try:
+        # Obtener información de las métricas
+        metrics_info = {
+            "success": True,
+            "model_name": "modelo_diatraea_Yolov8",
+            "num_classes": len(CLASS_NAMES),
+            "classes": CLASS_NAMES,
+            "description": "Modelo para clasificación de plagas en 6 categorías."
+        }
+        return jsonify(metrics_info), 200
+    except Exception as e:
+        return jsonify({"error": f"Ocurrió un error al obtener las métricas: {str(e)}"}), 500
+
+@app.route('/detect', methods=['POST'])
+def detect():
+    global request_count
+    request_count += 1  # Incrementar contador de peticiones
+
     if 'file' not in request.files:
         return "No se subió ningún archivo", 400
 
