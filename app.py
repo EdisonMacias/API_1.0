@@ -25,8 +25,8 @@ def image_to_base64(image):
     img_io.seek(0)
     return base64.b64encode(img_io.getvalue()).decode('utf-8')
 
-@app.route('/detect', methods=['POST'])
-def detect():
+@app.route('/predict', methods=['POST'])
+def predict():
     if 'file' not in request.files:
         return "No se subió ningún archivo", 400
 
