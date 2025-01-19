@@ -69,8 +69,8 @@ def metrics():
     except Exception as e:
         return jsonify({"error": f"Ocurrió un error al obtener las métricas: {str(e)}"}), 500
 
-@app.route('/detect', methods=['POST'])
-def detect():
+@app.route('/predict', methods=['POST'])
+def predict():
     global request_count
     request_count += 1  # Incrementar contador de peticiones
 
